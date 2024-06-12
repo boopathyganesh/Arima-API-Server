@@ -1,0 +1,40 @@
+const mongoose = require('mongoose');
+
+const ProductSchema = mongoose.Schema({
+  product_category: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'product_category' },
+  shop_category: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'vendors' },
+  shop_status: { type: Number, required: false, default: 1 },
+  name: { type: String, required: true, default: "" },
+  brand: { type: String, required: false, default: "" },
+  origin: { type: String, required: false, default: "" },
+  warranty: { type: String, required: false, default: "" },
+  description: { type: String, required: false, default: "" },
+  caution: { type: String, required: false, default: "" },
+  quantity: { type: Number, required: true, default: 1 },
+  stock: { type: Number, required: true, default: 0 },
+  mrp: { type: Number, required: true, default: 0 },
+  selling_price: { type: Number, required: true, default: 0 },
+  product_tax_value: { type: Number, required: false, default: 0 },
+  is_gst: { type: String, required: false, default: "" },
+  isreturn: { type: Boolean, required: true, default: false },
+  returnDays: { type: Number, required: false, default: 0 },
+  isexchange: { type: Boolean, required: true, default: false },
+  skuid: { type: String, required: true, default: 0 },
+  key_name: { type: String },
+  product_image: { type: String, required: true, default: "" },
+  product_profile_image: [
+    {
+      type: String,
+    },
+  ],
+  variants: { type: String, required: false, default: "" },
+  discount: { type: Number, required: false, default: "" },
+  product_status: { type: String, required: false, default: "PENDING" },
+  status: { type: Number, required: false, default: 1 },
+  size: { type: String, required: false, default: "" },
+  color: { type: String, required: false, default: "" },
+  color_code: { type: String, required: false, default: "" },
+  wishlist: { type: Number, default: 0 },
+},
+  { collection: 'products', timestamps: true })
+module.exports = mongoose.model('products', ProductSchema)
