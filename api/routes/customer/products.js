@@ -7,6 +7,7 @@ const ProdcutsController = require("../../controllers/customer/product");
 const auth = require('../../middleware/auth');
 
 router.get('/filter', ProdcutsController.productsFilterByOptions);
+router.get('/search', ProdcutsController.searchProducts);
 
 router.get('/wishlist/:id', auth, ProdcutsController.allProductsWithWishlist);
 // router.post('/customerWebLogin', CustomersController.customerWebLogin);

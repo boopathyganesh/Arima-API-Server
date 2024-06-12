@@ -75,6 +75,65 @@ exports.productsFilterByOptions = async (req, res) => {
   }
 };
 
+exports.searchProducts = async (req, res) => {
+  try {
+    const { name, category, minPrice, maxPrice, origin, brand, minRating, inStock, sort = 'selling_price', limit = 10, page = 1 } = req.query;
+
+    // Initialize the filter object
+    const filter = {};
+
+    // Add search filters
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
+    }
+
+    if (category) {
+      filter.category = { $regex: category, $options: 'i' };
+    }
+
+    if (origin) {
+      filter.origin = { $regex: origin, $options: 'i' };
+    }
+
+    if (minPrice) {
+      filter.selling_price = { ...filter.selling_price, $gte: parseInt(minPrice) };
+    }
+
+    if (maxPrice) {
+      filter.selling_price = { ...filter.selling_price, $lte: parseInt(maxPrice) };
+    }
+
+    if (brand) {
+      filter.brand = { $regex: brand, $options: 'i' };
+    }
+
+    if (minRating) {
+      filter.rating = { $gte: parseInt(minRating) };
+    }
+
+    if (inStock !== undefined) {
+      filter.inStock = inStock === 'true';
+    }
+
+    // Pagination
+    const limitValue = parseInt(limit);
+    const skipValue = (parseInt(page) - 1) * limitValue;
+
+    // Fetch products from the database with the constructed filter
+    const products = await Product.find(filter)
+      .limit(limitValue)
+      .skip(skipValue)
+      .sort(sort)
+      .exec();
+
+    // Send the response
+    res.status(200).send({ status: true, length: products.length, data: products, message: 'Searched Products' });
+  } catch (err) {
+    console.error('Error searching products:', err);
+    res.status(500).send({ status: false, message: 'An error occurred while searching for products.' });
+  }
+};
+
 
 exports.allProductsWithWishlist = async (req, res) => {
   try {
