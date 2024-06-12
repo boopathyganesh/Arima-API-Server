@@ -113,8 +113,9 @@ exports.customerWebLogin = async (req, res) => {
         const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
         var valid = emailRegexp.test(emailToValidate);
         const Checkuser = await Customer.findOne({ email });
-
+        console.log(Checkuser.password,password)
         bcrypt.compare(password, Checkuser.password, (bErr, bResult) => {
+            console.log(bResult)
             if (bErr) {
                 res.status(200).send({ status: "false", message: 'Password Wrong' })
             } else
@@ -140,18 +141,21 @@ exports.customerWebLogin = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
+    console.log("Forgot pass email:",email)
     const user = await Customer.findOne({ email });
+    console.log("User:",user)
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
     };
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id }, SECRET, {
         expiresIn: '1hr'
     });
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    const resetUrl = `${process.env.WEBSITE_URL}${process.env.WEBSITE_VERIFY_EMAIL}/${token}`;
+    //const resetUrl = `${process.env.WEBSITE_URL}${process.env.WEBSITE_VERIFY_EMAIL}/${token}`;
+    const resetUrl = `http://localhost:3009/reset-password/${token}`;
 
     const message = `
       <h1>You have requested a password reset</h1>
@@ -181,7 +185,7 @@ exports.resetPassword = async (req, res) => {
     const { password, token } = req.body;
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, SECRET);
         const user = await Customer.findOne({
             _id: decoded.userId,
             resetPasswordToken: token,
@@ -190,7 +194,17 @@ exports.resetPassword = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Invalid or expired token' });
         };
-        user.password = password;
+        const hashedPassword = await new Promise((resolve, reject) => {
+            bcrypt.hash(password, 10, (err, hash) => {
+                if (err) {
+                    console.error('Error hashing password:', err);
+                    reject(err);
+                } else {
+                    resolve(hash);
+                }
+            });
+        });
+        user.password = hashedPassword;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
 
