@@ -11,6 +11,7 @@ const CheckoutController = require("./cart");
 const ProductController = require("./products");
 const ReviewController = require("./review");
 const TermsConditionsController = require("./termsCondition");
+const InvoiceController = require("./invoice");
 
 router.use("/", UserController);
 
@@ -31,3 +32,5 @@ router.use("/products", ProductController);
 router.use("/review", ReviewController);
 
 router.use("/termsConditions", TermsConditionsController);
+
+router.use("/invoices", InvoiceController);
