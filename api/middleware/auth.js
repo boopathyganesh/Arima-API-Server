@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-SECRET = "0wnUY/dCYJTkzYUxBYOcQHM3kJGd+Z/woNpnLMvMBhE="
 module.exports = function (req, res, next) {
     const token = req.header("Authorization");
     if (!token) return res.status(200).json({ "status": false, message: "Auth Error" });
@@ -8,8 +7,7 @@ module.exports = function (req, res, next) {
     if (!bearer_token) return res.status(200).json({ "status": false, message: "Auth Error" });
 
     try {
-        //const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
-        const decoded = jwt.verify(bearer_token, SECRET);
+        const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
         req.user = decoded.user;
         next();
     } catch (e) {

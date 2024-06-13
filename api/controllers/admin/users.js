@@ -1,9 +1,7 @@
-
 const Admin = require('../../models/admin/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const SECRET = "0wnUY/dCYJTkzYUxBYOcQHM3kJGd+Z/woNpnLMvMBhE="
 
 exports.adminRegister = async (req, res) => {
     const { phone_number, name, email, password, image, gender } = req.body
@@ -44,8 +42,7 @@ exports.adminRegister = async (req, res) => {
             console.log('user', user);
 
             const payload = { user: { id: user.id } }
-            //console.log("secret",process.env.JWT_SECRET)
-            jwt.sign(payload, SECRET, { expiresIn: '365d' }, (err, token) => {
+            jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '365d' }, (err, token) => {
                 if (err) throw err
                 res.status(200).send({ status: "true", message: 'Admin/Manager successfully added', data: { "id": user.id, "access_token": token } })
             }
@@ -81,7 +78,7 @@ exports.adminLogin = async (req, res) => {
                 const payload = { user: { id: Checkuser._id } };
                 console.log(payload);
 
-                jwt.sign(payload, SECRET, { expiresIn: '360d' }, (err, token) => {
+                jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '360d' }, (err, token) => {
                     if (err) {
                         return res.status(500).send({ status: false, message: 'Error', data: err });
                     }

@@ -17,8 +17,8 @@ const InitiateMongoServer = async () => {
 
     /* Boopathy@Alpha */
     /* 03/06/2024 */
-    const connectionUri = 'mongodb+srv://boopathydev:9VzLdqjrIjiVeQpi@clusteralpha.0alwstn.mongodb.net';
-    const dbName = 'arima';
+    const connectionUri = process.env.MONGODB_URL;
+    const dbName = process.env.MONGODB_NAME;
 
     try {
       await mongoose.connect(`${connectionUri}/${dbName}`, options);

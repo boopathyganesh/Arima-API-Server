@@ -59,7 +59,7 @@ exports.addShop = async (req, res) => {
         }
 
         let user_count = await Vendor.countDocuments();
-        user_id = user_count + 1
+        let user_id = user_count + 1
 
         let shop_id = await generateShopId(user_id);
 

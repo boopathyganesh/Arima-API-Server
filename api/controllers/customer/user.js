@@ -5,8 +5,6 @@ const jwt = require('jsonwebtoken');
 const generateUserId = require("../../utils/generateUserId");
 const SendEmail = require('../../utils/sendEmail');
 
-const SECRET = "0wnUY/dCYJTkzYUxBYOcQHM3kJGd+Z/woNpnLMvMBhE="
-
 exports.create_customer = async (req, res) => {
     console.log('rex', req.body);
     const { country_code, phone_number, userName, email, device_id, otp, password, totalOrder, status, type } = req.body;
@@ -26,10 +24,6 @@ exports.create_customer = async (req, res) => {
             } else if (existingPhone) {
                 return res.status(401).json({ status: false, message: 'Phone Number Already Exists' })
             } else {
-                // let customer_count = await Customer.countDocuments();
-                // user_number = customer_count + 1;
-                // customerId = "CUS" + user_number.toString().padStart(3, '0');
-
                 const hashedPassword = await new Promise((resolve, reject) => {
                     bcrypt.hash(password, 10, (err, hash) => {
                         if (err) {
@@ -41,13 +35,16 @@ exports.create_customer = async (req, res) => {
                     });
                 });
 
+                let customer_count = await Customer.countDocuments();
+                let customer_id=customer_count+1
+                
                 const customer = new Customer({
                     country_code,
                     userName,
                     email,
                     password: hashedPassword,
                     phone_number,
-                    customerId: generateUserId()
+                    customerId: generateUserId(customer_id)
                 });
 
                 await customer.save();
@@ -113,16 +110,13 @@ exports.customerWebLogin = async (req, res) => {
         const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
         var valid = emailRegexp.test(emailToValidate);
         const Checkuser = await Customer.findOne({ email });
-        console.log(Checkuser.password,password)
         bcrypt.compare(password, Checkuser.password, (bErr, bResult) => {
-            console.log(bResult)
             if (bErr) {
                 res.status(200).send({ status: "false", message: 'Password Wrong' })
             } else
                 if (bResult == true) {
                     const payload = { user: { id: Checkuser._id } }
-                    //console.log(SECRET)
-                    jwt.sign(payload, SECRET, { expiresIn: '360d' }, (err, token) => {
+                    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '360d' }, (err, token) => {
                         if (err) {
                             res.status(500).send({ status: false, message: 'Error', data: err })
                         }
@@ -147,15 +141,15 @@ exports.forgotPassword = async (req, res) => {
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
     };
-    const token = jwt.sign({ userId: user._id }, SECRET, {
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: '1hr'
     });
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    //const resetUrl = `${process.env.WEBSITE_URL}${process.env.WEBSITE_VERIFY_EMAIL}/${token}`;
-    const resetUrl = `http://localhost:3009/reset-password/${token}`;
+    const resetUrl = `${process.env.WEBSITE_URL}${process.env.WEBSITE_VERIFY_EMAIL}/${token}`;
+    //const resetUrl = `http://localhost:3009/reset-password/${token}`;
 
     const message = `
       <h1>You have requested a password reset</h1>
@@ -185,7 +179,7 @@ exports.resetPassword = async (req, res) => {
     const { password, token } = req.body;
 
     try {
-        const decoded = jwt.verify(token, SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await Customer.findOne({
             _id: decoded.userId,
             resetPasswordToken: token,

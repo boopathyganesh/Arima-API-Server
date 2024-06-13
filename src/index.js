@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const socketIO = require('socket.io');
 const cors = require('cors')
@@ -6,30 +8,29 @@ const path = require('path');
 
 const app = express();
 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
 
-
-//app.use('/uploads', express.static('uploads'));
-
-const server = app.listen(8014, (req, res) => {
-    console.log('Api started at 8014');
+const PORT = process.env.PORT;
+const server = app.listen(PORT, (req, res) => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
-    console.log('Socket Connected.');
-    socket.on('disconnect', function () {
-        console.log('Socket Disconnected.');
-    });
+  console.log('Socket Connected.');
+  socket.on('disconnect', function () {
+    console.log('Socket Disconnected.');
+  });
 });
 
 app.get("/api", (req, res) => {
-    res.send("Welcome the New Arimas API's .")
+  res.send("Welcome the New Arimas API's .")
 });
 
 //Start Monogdb Server
@@ -89,12 +90,12 @@ app.use('/api/contact-us', ContactUsController);
 //Boopathy Ganesh @Alpha Solutions
 app.use('/uploads', express.static(path.join(__dirname, 'api', 'uploads')));
 app.get('/uploads/:folder/:subfolder/:filename', (req, res) => {
-    const { folder, subfolder, filename } = req.params;
-    console.log("folder:",folder,"subfolder:",subfolder,"filename:",filename)
-    const filePath = path.join(__dirname, 'uploads', folder, subfolder, filename);
-    res.sendFile(filePath, err => {
-      if (err) {
-        res.status(404).send('File not found');
-      }
-    });
+  const { folder, subfolder, filename } = req.params;
+  console.log("folder:", folder, "subfolder:", subfolder, "filename:", filename)
+  const filePath = path.join(__dirname, 'uploads', folder, subfolder, filename);
+  res.sendFile(filePath, err => {
+    if (err) {
+      res.status(404).send('File not found');
+    }
   });
+});
