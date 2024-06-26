@@ -22,7 +22,7 @@ exports.initilizedOrder = async (req, res) => {
 
         // Example: Generate a random 5-digit integer
         const random5DigitNumber = getRandom5DigitNumber();
-
+        console.log(orderData.cartDetails.length)
         if (orderData && orderData.cartDetails && orderData.cartDetails.length > 0) {
             const orderedProductsDocuments = orderData.cartDetails.map(item => ({
                 user: userId,

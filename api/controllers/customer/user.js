@@ -36,15 +36,16 @@ exports.create_customer = async (req, res) => {
                 });
 
                 let customer_count = await Customer.countDocuments();
-                let customer_id=customer_count+1
-                
+                let customers=customer_count+1
+                let customerId = await generateUserId(customers) //bugfix
+
                 const customer = new Customer({
                     country_code,
                     userName,
                     email,
                     password: hashedPassword,
                     phone_number,
-                    customerId: generateUserId(customer_id)
+                    customerId
                 });
 
                 await customer.save();
@@ -68,8 +69,8 @@ exports.create_customer = async (req, res) => {
                 return res.status(200).json({ status: false, message: 'Phone Number Already Exists' })
             } else {
                 let customer_count = await Customer.countDocuments();
-                user_number = customer_count + 1;
-                customerId = "CUS" + user_number.toString().padStart(3, '0');
+                let customers=customer_count+1
+                let customerId = await generateUserId(customers) //bugfix
 
                 // const hashedPassword = await new Promise((resolve, reject) => {
                 //     bcrypt.hash(password, 10, (err, hash) => {

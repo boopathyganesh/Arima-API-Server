@@ -30,10 +30,11 @@ const Review = require("../../models/customer/review");
 
 exports.productsFilterByOptions = async (req, res) => {
   try {
-    const { price, brand, discount, type,sort = 'selling_price',limit = 10, page = 1, } = req.query;  //limit = 10, page = 1, 
- 
-    // Initialize the filter object
-    const filter = {};
+    const { price, brand, discount, type, sort = 'selling_price', limit = 10, page = 1 } = req.query;
+    const { shopid } = req.params;  // Extract shopid from the request parameters
+
+    // Initialize the filter object and include shopid
+    const filter = { shop_category: shopid };
 
     // Add price filter based on type
     if (price) {
@@ -54,17 +55,20 @@ exports.productsFilterByOptions = async (req, res) => {
 
     // Add discount filter
     if (discount) {
-      filter.discount = { $gt: parseFloat(discount) }; // Assuming discount is a minimum percentage
+      filter.discount = { $gt: parseFloat(discount) };
     }
 
     // Pagination
     const limitValue = parseInt(limit);
     const skipValue = (parseInt(page) - 1) * limitValue;
+
     // Fetch products from the database with the constructed filter
     const products = await Product.find(filter)
-      //.limit(limitValue)
-      //.skip(skipValue)
-      //.sort(sort)
+      .limit(limitValue)
+      .skip(skipValue)
+      .sort(sort)
+      .populate('product_category')  // Populating the 'product_category' field
+      .populate('shop_category', 'shop_name')  // Populating the 'shop_category' field, only including 'shop_name'
       .exec();
 
     // Send the response
@@ -74,6 +78,7 @@ exports.productsFilterByOptions = async (req, res) => {
     res.status(500).send({ status: false, message: 'An error occurred while fetching products.' });
   }
 };
+
 
 exports.searchProducts = async (req, res) => {
   try {

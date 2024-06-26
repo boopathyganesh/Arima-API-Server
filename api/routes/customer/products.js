@@ -6,7 +6,7 @@ module.exports = router;
 const ProdcutsController = require("../../controllers/customer/product");
 const auth = require('../../middleware/auth');
 
-router.get('/filter', ProdcutsController.productsFilterByOptions);
+router.get('/filter/:shopid', ProdcutsController.productsFilterByOptions);
 router.get('/search', ProdcutsController.searchProducts);
 
 router.get('/wishlist/:id', auth, ProdcutsController.allProductsWithWishlist);
